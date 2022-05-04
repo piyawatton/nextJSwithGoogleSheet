@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Col, Row, Input, Switch, Checkbox, Button, Modal, Form, Space, Spin } from 'antd';
 import 'antd/dist/antd.css';
 import './App.css';
-import { editHouse, getHouses, HousePayload } from './services';
+import { editHouse, getHouses, HousePayload, toggleAllowedHouse, toggleCheckHouse, toggleEmptyHouse } from './services';
 const { Search } = Input
 function App() {
   const [houseList, setHouseList] = React.useState<HousePayload[]>([]);
@@ -11,8 +11,10 @@ function App() {
   const [isCreating, setIsCreateing] = React.useState<boolean>(false)
 
   const doCallGetHouse = async () => {
+    setIsLoading(true)
     const response = await getHouses()
     setHouseList(response)
+    setIsLoading(false)
   }
 
   React.useEffect(() => {
@@ -28,6 +30,27 @@ function App() {
     setIsLoading(true)
     const response = await editHouse(house)
     doCallGetHouse()
+    setIsLoading(false)
+  }
+
+  const callToggleCheckHouse = async (house: HousePayload) => {
+    setIsLoading(true)
+    await toggleCheckHouse(house.id)
+    await doCallGetHouse()
+    setIsLoading(false)
+  }
+
+  const callToggleEmptyHouse = async (house: HousePayload) => {
+    setIsLoading(true)
+    await toggleEmptyHouse(house.id)
+    await doCallGetHouse()
+    setIsLoading(false)
+  }
+
+  const callToggleAllowedHouse = async (house: HousePayload) => {
+    setIsLoading(true)
+    await toggleAllowedHouse(house.id)
+    await doCallGetHouse()
     setIsLoading(false)
   }
 
@@ -51,21 +74,24 @@ function App() {
                         style={{ transform: 'scale(1.4)' }}
                         checkedChildren="ตรวจแล้ว" unCheckedChildren="ยังไม่ตรวจ"
                         checked={house.checked === 1}
-                        onChange={(checked) => {
-                          updateHouse({
-                            ...house,
-                            checked: checked ? 1 : 0,
-                          })
-                        }}
+                        onChange={(checked) => { callToggleCheckHouse(house) }}
                       />
                     </div>
                     <div style={{ marginTop: 25 }}>
-                      <Checkbox style={{ transform: 'scale(1.3)' }} checked={house.isEmpty === 1}>
+                      <Checkbox
+                        style={{ transform: 'scale(1.3)' }}
+                        checked={house.isEmpty === 1}
+                        onChange={() => { callToggleEmptyHouse(house) }}
+                      >
                         ไม่มีคนอยู่
                       </Checkbox>
                     </div>
                     <div style={{ marginTop: 25 }}>
-                      <Checkbox style={{ transform: 'scale(1.3)' }} checked={house.allowed === 1}>
+                      <Checkbox
+                        style={{ transform: 'scale(1.3)' }}
+                        checked={house.allowed === 1}
+                        onChange={() => { callToggleAllowedHouse(house) }}
+                      >
                         ไม่สะดวกให้ข้อมูล
                       </Checkbox>
                     </div>
