@@ -7,6 +7,7 @@ export type HousePayload = {
   houseNumber: string;
   checked: 1 | 0;
   isEmpty: 1 | 0;
+  allowed: 1 | 0;
 }
 
 export const getHouses = async (): Promise<HousePayload[]> => {
